@@ -36,6 +36,9 @@ public class AuthenticationService {
     }
 
     public User signUp(RegisterUserDto input) {
+
+        // this creates a user, sends the verification code
+        // to their email, and then saves the user as disabled
         User user = new User(
                 input.getUsername(),
                 input.getEmail(),
@@ -50,7 +53,9 @@ public class AuthenticationService {
     }
 
     public User authenticate(LoginUserDto input) {
-        // attempts to find user by email and verify them
+
+        // tries to authenticate user logins, but only for enabled
+        // users
         User user = userRepository.findByEmail(input.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -68,6 +73,10 @@ public class AuthenticationService {
     }
 
     public void verifyUser(VerifyUserDto input) {
+
+        // finds user by email, checks if non-expired verification code
+        // matches the one provided. if so, clear verification fields
+        // and enable the accounts
         Optional<User> optionalUser = userRepository.findByEmail(input.getEmail());
 
         if (optionalUser.isPresent()) {
@@ -90,6 +99,9 @@ public class AuthenticationService {
     }
 
     public void resendVerificationCode(String email) {
+
+        // if the user exists, generate a whole new code with new expiration,
+        // and send it again to the user
         Optional<User> optionalUser = userRepository.findByEmail(email);
 
         if (optionalUser.isPresent()) {
