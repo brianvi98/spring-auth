@@ -18,9 +18,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class ApplicationConfiguration {
-
+    // configures all the beans that Spring Security needs to use
+    // under the hood
     private final UserRepository userRepository;
 
+    // tells Spring how to find a user by some username
     @Bean
     // username is actually the email, which is why we're using that method
     UserDetailsService userDetailsService() {
@@ -28,16 +30,19 @@ public class ApplicationConfiguration {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
+    // handles all password hashing and comparisons
     @Bean
     BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    // entry point for auth, using authenticationProvider to check credentials
     @Bean
     AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws AuthenticationException {
         return config.getAuthenticationManager();
     }
 
+    // uses my UserDetailsService and the encoder to know how to verify an auth
     @Bean
     AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService());
