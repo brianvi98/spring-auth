@@ -1,6 +1,6 @@
 package com.brianvi.spring_auth.security.filter;
 
-import com.brianvi.spring_auth.security.services.JwtService;
+import com.brianvi.spring_auth.security.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

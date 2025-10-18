@@ -1,4 +1,4 @@
-package com.brianvi.spring_auth.security.services;
+package com.brianvi.spring_auth.security.service;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
