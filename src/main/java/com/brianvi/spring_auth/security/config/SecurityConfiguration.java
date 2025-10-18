@@ -1,5 +1,6 @@
 package com.brianvi.spring_auth.security.config;
 
+import com.brianvi.spring_auth.security.filter.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -29,18 +30,27 @@ public class SecurityConfiguration {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
+    // controls what routes are protected, session handling, and filter chains
     @Bean
     public SecurityFilterChain springSecurityFilterChain(HttpSecurity http) throws Exception {
         http
+                // disables CSRF because JWTs are stateless
                 .csrf(AbstractHttpConfigurer::disable)
+                // only open auth routes but require auth on everything else
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/auth/**").permitAll()
                         .anyRequest().authenticated()
                 )
+                // tells Spring to be stateless
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                // using the authenticationProvider bean from AppConfig
                 .authenticationProvider(authenticationProvider)
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                // insert the JWT filter before the chain
+                .addFilterBefore(
+                        jwtAuthenticationFilter,
+                        UsernamePasswordAuthenticationFilter.class
+                );
 
         return http.build();
     }

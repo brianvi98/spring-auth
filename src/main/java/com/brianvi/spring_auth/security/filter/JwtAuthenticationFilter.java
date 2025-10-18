@@ -1,4 +1,4 @@
-package com.brianvi.spring_auth.security.config;
+package com.brianvi.spring_auth.security.filter;
 
 import com.brianvi.spring_auth.security.services.JwtService;
 import jakarta.servlet.FilterChain;
@@ -47,9 +47,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        // should not require authentication on login or signup paths,
-        // of course, but should require on others. this hits before
-        // the middleware, and right now CORS only allows POST and GET
         try {
             final String jwt = authHeader.substring(7);
             final String userEmail = jwtService.extractUsername(jwt);
@@ -67,8 +64,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
-
-
             }
         } catch (Exception e) {
             handlerExceptionResolver.resolveException(request, response, null, e);
