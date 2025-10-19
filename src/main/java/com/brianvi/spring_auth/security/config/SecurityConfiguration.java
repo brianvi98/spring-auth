@@ -32,7 +32,7 @@ public class SecurityConfiguration {
 
     // controls what routes are protected, session handling, and filter chains
     @Bean
-    public SecurityFilterChain springSecurityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 // disables CSRF because JWTs are stateless
                 .csrf(AbstractHttpConfigurer::disable)
@@ -60,7 +60,8 @@ public class SecurityConfiguration {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of(
                 "https://site.com",
-                "http://localhost:5173"
+                "http://localhost:5173",
+                "*"
         ));
         configuration.setAllowedMethods(List.of(
                 "GET",
