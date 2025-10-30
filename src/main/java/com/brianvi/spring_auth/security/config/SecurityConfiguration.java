@@ -66,18 +66,18 @@ public class SecurityConfiguration {
 
                         response.getWriter().write(new ObjectMapper().writeValueAsString(apiResponse));
                     })
-                        .accessDeniedHandler((request, response, accessDeniedException) -> {
-                            response.setContentType("application/json");
-                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    .accessDeniedHandler((request, response, accessDeniedException) -> {
+                        response.setContentType("application/json");
+                        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
 
-                            ApiResponse<Object> apiResponse = ApiResponse.error(
-                                    "Access Denied",
-                                    HttpServletResponse.SC_FORBIDDEN,
-                                    request.getRequestURI()
-                            );
+                        ApiResponse<Object> apiResponse = ApiResponse.error(
+                                "Access Denied",
+                                HttpServletResponse.SC_FORBIDDEN,
+                                request.getRequestURI()
+                        );
 
-                            response.getWriter().write(new ObjectMapper().writeValueAsString(apiResponse));
-                        })
+                        response.getWriter().write(new ObjectMapper().writeValueAsString(apiResponse));
+                    })
                 );
 
         return http.build();
