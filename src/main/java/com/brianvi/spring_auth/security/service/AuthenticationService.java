@@ -3,6 +3,7 @@ package com.brianvi.spring_auth.security.service;
 import com.brianvi.spring_auth.security.dto.LoginUserDto;
 import com.brianvi.spring_auth.security.dto.RegisterUserDto;
 import com.brianvi.spring_auth.security.dto.VerifyUserDto;
+import com.brianvi.spring_auth.security.exception.UserAlreadyExistsException;
 import com.brianvi.spring_auth.user.model.User;
 import com.brianvi.spring_auth.user.repository.UserRepository;
 import jakarta.mail.MessagingException;
@@ -35,8 +36,13 @@ public class AuthenticationService {
         this.emailService = emailService;
     }
 
-    public User signUp(RegisterUserDto input) {
+    public User signUp(RegisterUserDto input) throws UserAlreadyExistsException {
 
+        // catch if an account with this email already exists
+        if (userRepository.findByEmail(input.getEmail()).isPresent()) {
+            throw new UserAlreadyExistsException("An account has already been registered with this email. " +
+                    "You may check your email for a six-digit code and proceed to verify");
+        }
         // this creates a user, sends the verification code
         // to their email, and then saves the user as disabled
         User user = new User(
@@ -81,6 +87,10 @@ public class AuthenticationService {
 
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
+
+            if (user.isEnabled()) {
+                throw new RuntimeException("User is already verified");
+            }
 
             if (user.getVerificationExpiration().isBefore(LocalDateTime.now())) {
                 throw new RuntimeException("Verification code has expired");

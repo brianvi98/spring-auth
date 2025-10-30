@@ -1,12 +1,15 @@
 package com.brianvi.spring_auth.security.controller;
 
+import com.brianvi.spring_auth.response.ApiResponse;
 import com.brianvi.spring_auth.security.dto.LoginUserDto;
 import com.brianvi.spring_auth.security.dto.RegisterUserDto;
 import com.brianvi.spring_auth.security.dto.VerifyUserDto;
+import com.brianvi.spring_auth.security.exception.UserAlreadyExistsException;
 import com.brianvi.spring_auth.security.response.LoginResponse;
 import com.brianvi.spring_auth.security.service.AuthenticationService;
 import com.brianvi.spring_auth.security.service.JwtService;
 import com.brianvi.spring_auth.user.model.User;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,36 +25,42 @@ public class AuthenticationController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<User> register(@RequestBody RegisterUserDto registerUserDto) {
+    public ResponseEntity<?> register(
+            @RequestBody RegisterUserDto registerUserDto,
+            HttpServletRequest request
+    ) throws UserAlreadyExistsException
+    {
         User registeredUser = authenticationService.signUp(registerUserDto);
-        return ResponseEntity.ok(registeredUser);
+        ApiResponse<User> response = ApiResponse.success(registeredUser, request.getRequestURI());
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> authenticate(@RequestBody LoginUserDto loginUserDto) {
+    public ResponseEntity<ApiResponse<LoginResponse>> authenticate(
+            @RequestBody LoginUserDto loginUserDto,
+            HttpServletRequest request
+    ) {
         User authenticatedUser = authenticationService.authenticate(loginUserDto);
         String jwtToken = jwtService.generateToken(authenticatedUser);
         LoginResponse loginResponse = new LoginResponse(jwtToken, jwtService.getExpirationTime());
-        return ResponseEntity.ok(loginResponse);
+        ApiResponse<LoginResponse> response = ApiResponse.success(loginResponse, request.getRequestURI());
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/verify")
-    public ResponseEntity<?> verify(@RequestBody VerifyUserDto verifyUserDto) {
-        try {
-            authenticationService.verifyUser(verifyUserDto);
-            return ResponseEntity.ok("Account successfully verified");
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<?> verify(
+            @RequestBody VerifyUserDto verifyUserDto,
+            HttpServletRequest request
+    ) {
+        authenticationService.verifyUser(verifyUserDto);
+        ApiResponse<String> response = ApiResponse.success("Account successfully verified", request.getRequestURI());
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/resend")
-    public ResponseEntity<?> resendVerificationCode(@RequestParam String email ) {
-        try {
-            authenticationService.resendVerificationCode(email);
-            return ResponseEntity.ok("Verification code sent");
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<?> resendVerificationCode(@RequestParam String email, HttpServletRequest request) {
+        authenticationService.resendVerificationCode(email);
+        ApiResponse<String> response = ApiResponse.success("Verification code sent", request.getRequestURI());
+        return ResponseEntity.ok(response);
     }
 }
