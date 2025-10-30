@@ -1,6 +1,9 @@
 package com.brianvi.spring_auth.security.config;
 
+import com.brianvi.spring_auth.response.ApiResponse;
 import com.brianvi.spring_auth.security.filter.JwtAuthenticationFilter;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -50,6 +53,31 @@ public class SecurityConfiguration {
                 .addFilterBefore(
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class
+                ).exceptionHandling(exceptions -> exceptions
+                    .authenticationEntryPoint((request, response, authException) -> {
+                        response.setContentType("application/json");
+                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+
+                        ApiResponse<Object> apiResponse = ApiResponse.error(
+                                "Unauthorized",
+                                HttpServletResponse.SC_UNAUTHORIZED,
+                                request.getRequestURI()
+                        );
+
+                        response.getWriter().write(new ObjectMapper().writeValueAsString(apiResponse));
+                    })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.setContentType("application/json");
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+
+                            ApiResponse<Object> apiResponse = ApiResponse.error(
+                                    "Access Denied",
+                                    HttpServletResponse.SC_FORBIDDEN,
+                                    request.getRequestURI()
+                            );
+
+                            response.getWriter().write(new ObjectMapper().writeValueAsString(apiResponse));
+                        })
                 );
 
         return http.build();

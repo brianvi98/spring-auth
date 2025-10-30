@@ -25,13 +25,14 @@ public class AuthenticationController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> register(
+    public ResponseEntity<ApiResponse<String>> register(
             @RequestBody RegisterUserDto registerUserDto,
             HttpServletRequest request
     ) throws UserAlreadyExistsException
     {
-        User registeredUser = authenticationService.signUp(registerUserDto);
-        ApiResponse<User> response = ApiResponse.success(registeredUser, request.getRequestURI());
+        authenticationService.signUp(registerUserDto);
+        ApiResponse<String> response = ApiResponse
+                .success("Sign up successful for " + registerUserDto.getEmail(), request.getRequestURI());
         return ResponseEntity.ok(response);
     }
 

@@ -1,8 +1,10 @@
 package com.brianvi.spring_auth.user.controller;
 
+import com.brianvi.spring_auth.response.ApiResponse;
 import com.brianvi.spring_auth.user.dto.UserDto;
 import com.brianvi.spring_auth.user.model.User;
 import com.brianvi.spring_auth.user.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,28 +27,18 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserDto> authenticatedUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity.status(401).build();
-        }
-
-        Object principal = authentication.getPrincipal();
-        if (!(principal instanceof User user)) {
-            return ResponseEntity.status(401).build();
-        }
-
+    public ResponseEntity<ApiResponse<UserDto>> authenticatedUser(HttpServletRequest request) {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         UserDto userDto = new UserDto(user.getId(), user.getUsername(), user.getEmail());
-        return ResponseEntity.ok(userDto);
+        return ResponseEntity.ok(ApiResponse.success(userDto, request.getRequestURI()));
     }
 
     @GetMapping("/")
-    public ResponseEntity<List<String>> allUsers() {
-        List<String> usernames = new ArrayList<>();
+    public ResponseEntity<ApiResponse<List<String>>> allUsers(HttpServletRequest request) {
+        List<String> usernames = userService.allUsers().stream()
+                .map(User::getUsername).toList();
 
-        for (User u : userService.allUsers()) {
-            usernames.add(u.getUsername());
-        }
-        return ResponseEntity.ok(usernames);
+        ApiResponse<List<String>> response = ApiResponse.success(usernames, request.getRequestURI());
+        return ResponseEntity.ok(response);
     }
 }

@@ -26,7 +26,8 @@ public class ApplicationConfiguration {
     @Bean
     // username is actually the email, which is why we're using that method
     UserDetailsService userDetailsService() {
-        return username -> userRepository.findByEmail(username)
+        return input -> userRepository.findByEmail(input)
+                .or(() -> userRepository.findByUsername(input))
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
