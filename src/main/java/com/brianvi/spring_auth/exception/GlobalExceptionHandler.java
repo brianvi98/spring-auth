@@ -14,29 +14,29 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    private ResponseEntity<ApiResponse<Object>> buildErrorResponse(
+            String message, HttpStatus status, HttpServletRequest request) {
+        return ResponseEntity
+                .status(status)
+                .body(ApiResponse.error(message, status.value(), request.getRequestURI()));
+    }
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ApiResponse<Object>> handleRuntimeException(
             RuntimeException exception, HttpServletRequest request
     ) {
-        return ResponseEntity
-                .badRequest()
-                .body(ApiResponse.error(
-                        exception.getMessage(),
-                        HttpStatus.BAD_REQUEST.value(),
-                        request.getRequestURI()
-                ));
+        return buildErrorResponse(exception.getMessage(), HttpStatus.BAD_REQUEST, request);
     }
 
     @ExceptionHandler(UserAlreadyExistsException.class)
     public ResponseEntity<ApiResponse<Object>> handleUserAlreadyExistsException(
             UserAlreadyExistsException exception, HttpServletRequest request
     ) {
-        return ResponseEntity
-                .badRequest()
-                .body(ApiResponse.error(
-                        exception.getMessage(),
-                        HttpStatus.BAD_REQUEST.value(),
-                        request.getRequestURI()
-                ));
+        return buildErrorResponse(exception.getMessage(), HttpStatus.BAD_REQUEST, request);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiResponse<Object>> handleException(Exception exception, HttpServletRequest request) {
+        return buildErrorResponse("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR, request);
     }
 }
