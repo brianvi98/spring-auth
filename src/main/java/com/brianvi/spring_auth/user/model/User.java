@@ -3,6 +3,7 @@ package com.brianvi.spring_auth.user.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -19,7 +20,7 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(unique = true, nullable = false)
-    private String username;
+    private String displayName;
     @Column(unique = true, nullable = false)
     private String email;
     @Column(nullable = false)
@@ -32,8 +33,8 @@ public class User implements UserDetails {
     @Column(name = "verification_expiration")
     private LocalDateTime verificationExpiration;
 
-    public User(String username, String email, String password) {
-        this.username = username;
+    public User(String displayName, String email, String password) {
+        this.displayName = displayName;
         this.email = email;
         this.password = password;
     }
@@ -41,8 +42,15 @@ public class User implements UserDetails {
     public User() {
     }
 
+    @Override
+    @NullMarked
+    public String getUsername() {
+        return this.email;
+    }
+
     // for role based auth
     @Override
+    @NullMarked
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of();
     }
