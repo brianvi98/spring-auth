@@ -33,7 +33,7 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success(userDto, request.getRequestURI()));
     }
 
-    @GetMapping("/")
+    @GetMapping
     public ResponseEntity<ApiResponse<List<String>>> allUsers(HttpServletRequest request) {
         List<String> usernames = userService.allUsers().stream()
                 .map(User::getUsername).toList();
