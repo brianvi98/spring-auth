@@ -27,7 +27,7 @@ public class ApplicationConfiguration {
     // username is actually the email, which is why we're using that method
     UserDetailsService userDetailsService() {
         return input -> userRepository.findByEmail(input)
-                .or(() -> userRepository.findByUsername(input))
+                .or(() -> userRepository.findByDisplayName(input))
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
